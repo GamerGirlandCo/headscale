@@ -15,7 +15,8 @@ import (
 )
 
 func (hsdb *HSDatabase) RegisterWireguardOnlyNode(
-	mkey key.NodePublic,
+	nkey key.NodePublic,
+	mkey key.MachinePublic,
 	userID types.UserID,
 	ipv4 *netip.Addr,
 	ipv6 *netip.Addr,
@@ -50,18 +51,18 @@ func (hsdb *HSDatabase) RegisterWireguardOnlyNode(
 				RoutableIPs: []netip.Prefix{
 					netip.MustParsePrefix("0.0.0.0/0"),
 					netip.MustParsePrefix("::/0"),
-					netip.PrefixFrom(*ipv4, 24),
-					netip.PrefixFrom(*ipv6, 48),
+					netip.PrefixFrom(*ipv4, 32),
+					netip.PrefixFrom(*ipv6, 128),
 				},
 				Location: location,
 			},
 			GivenName:       hostname,
 			Hostname:        hostname,
-			NodeKey:         mkey,
+			NodeKey:         nkey,
 			LastSeen:        &now,
 			IsWireguardOnly: true,
-			IPv4:            nodeIpv4,
-			IPv6:            nodeIpv6,
+			IPv4:            ipv4,
+			IPv6:            ipv6,
 			Endpoints: []netip.AddrPort{
 				netip.AddrPortFrom(*ipv4, uint16(req.Port)),
 				netip.AddrPortFrom(*ipv6, uint16(req.Port)),

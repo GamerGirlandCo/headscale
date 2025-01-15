@@ -558,16 +558,20 @@ func (api headscaleV1APIServer) RegisterPeer(
 	}
 	ipv6, err := netip.ParseAddr(request.GetIpv6())
 	var nkey key.NodePublic
+	var mkey key.MachinePublic
 	err = nkey.UnmarshalText([]byte(request.GetPubKey()))
 	if err != nil {
-		return nil, fmt.Errorf("parse ip addr: %w", err)
+		return nil, fmt.Errorf("parse public key: %w", err)
 	}
-
+	err = mkey.UnmarshalText([]byte(strings.Replace(request.GetPubKey(), "nodekey", "mkey", 1)))
+	if err != nil {
+		return nil, fmt.Errorf("parse public key:")
+	}
 	user, err := api.h.db.GetUserByName(request.GetUser())
 	if err != nil {
 		return nil, fmt.Errorf("looking up user: %w", err)
 	}
-	
+
 	nipv4, nipv6, err := api.h.ipAlloc.Next()
 	if err != nil {
 		return nil, err
@@ -575,6 +579,7 @@ func (api headscaleV1APIServer) RegisterPeer(
 
 	node, err := api.h.db.RegisterWireguardOnlyNode(
 		nkey,
+		mkey,
 		types.UserID(user.ID),
 		&ipv4, &ipv6,
 		nipv4, nipv6,

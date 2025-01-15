@@ -112,6 +112,7 @@ func tailNode(
 
 		MachineAuthorized: !node.IsExpired(),
 		Expired:           node.IsExpired(),
+		IsWireGuardOnly:   node.IsWireguardOnly,
 	}
 
 	tNode.CapMap = tailcfg.NodeCapMap{
