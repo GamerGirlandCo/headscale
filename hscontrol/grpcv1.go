@@ -546,7 +546,7 @@ func (api headscaleV1APIServer) BackfillNodeIPs(
 
 func (api headscaleV1APIServer) RegisterPeer(
 	ctx context.Context,
-	request *v1.RegisterWgPeerRequest) (*v1.RegisterNodeResponse, error) {
+	request *v1.RegisterWireguardPeerRequest) (*v1.RegisterNodeResponse, error) {
 	log.Trace().
 		Str("user", request.GetUser()).
 		Str("public_key", request.GetPubKey()).
@@ -567,11 +567,17 @@ func (api headscaleV1APIServer) RegisterPeer(
 	if err != nil {
 		return nil, fmt.Errorf("looking up user: %w", err)
 	}
+	
+	nipv4, nipv6, err := api.h.ipAlloc.Next()
+	if err != nil {
+		return nil, err
+	}
 
 	node, err := api.h.db.RegisterWireguardOnlyNode(
 		nkey,
 		types.UserID(user.ID),
 		&ipv4, &ipv6,
+		nipv4, nipv6,
 		request,
 	)
 	if err != nil {
@@ -587,8 +593,8 @@ func (api headscaleV1APIServer) RegisterPeer(
 }
 
 func (api headscaleV1APIServer) ListPeers(
-	ctx context.Context, 
-	request *v1.ListWgPeersRequest) (*v1.ListNodesResponse, error) {
+	ctx context.Context,
+	request *v1.ListWireguardPeersRequest) (*v1.ListNodesResponse, error) {
 	isLikelyConnected := xsync.NewMapOf[types.NodeID, bool]()
 	if request.GetUser() != "" {
 		user, err := api.h.db.GetUserByName(request.GetUser())

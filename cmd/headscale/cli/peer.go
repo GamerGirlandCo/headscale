@@ -110,7 +110,7 @@ var registerPeerCmd = &cobra.Command{
 		if err != nil {
 			long = 0
 		}
-		res, err := client.RegisterPeer(ctx, &v1.RegisterWgPeerRequest{
+		res, err := client.RegisterPeer(ctx, &v1.RegisterWireguardPeerRequest{
 			User:        user,
 			PubKey:      rpc.PublicKey,
 			Ipv4:        rpc.Ip4,

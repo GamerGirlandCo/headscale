@@ -374,7 +374,6 @@ func (h *Headscale) handleAuthKey(
 		node, err = h.db.RegisterNode(
 			nodeToRegister,
 			ipv4, ipv6,
-			false,
 		)
 		if err != nil {
 			log.Error().

@@ -7,6 +7,7 @@ import "google/api/annotations.proto";
 import "headscale/v1/user.proto";
 import "headscale/v1/preauthkey.proto";
 import "headscale/v1/node.proto";
+import "headscale/v1/wg_node.proto";
 import "headscale/v1/routes.proto";
 import "headscale/v1/apikey.proto";
 import "headscale/v1/policy.proto";
@@ -134,13 +135,14 @@ service HeadscaleService {
   // --- Node end ---
 
   // --- Peer start ---
-  rpc RegisterPeer(RegisterWgPeerRequest) returns (RegisterNodeResponse) {
+
+  rpc RegisterPeer(RegisterWireguardPeerRequest) returns (RegisterNodeResponse) {
     option (google.api.http) = {
       post : "/api/v1/peer/register"
     };
   }
 
-  rpc ListPeers(ListWgPeersRequest) returns (ListNodesResponse) {
+  rpc ListPeers(ListWireguardPeersRequest) returns (ListNodesResponse) {
     option (google.api.http) = {
       get : "/api/v1/peer"
     };

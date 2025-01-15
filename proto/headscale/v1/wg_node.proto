@@ -1,0 +1,42 @@
+syntax = "proto3";
+package headscale.v1;
+
+import "google/protobuf/timestamp.proto";
+import "headscale/v1/preauthkey.proto";
+import "headscale/v1/user.proto";
+
+option go_package = "github.com/juanfont/headscale/gen/go/v1";
+
+
+message WireguardPeer {
+	uint64 id = 1;
+	uint64 node_id = 2;
+	string public_key = 3;
+	string endpoint_v4 = 4;
+	string endpoint_v6 = 5;
+	uint32 port = 6;
+	string country = 7;
+	string country_code = 8;
+	string city = 9;
+	string city_code = 10;
+	double longitude = 11;
+	double latitude = 12;
+}
+
+message ListWireguardPeersRequest {
+  string user = 1;
+}
+
+message RegisterWireguardPeerRequest {
+  string user = 1;
+  string pub_key = 2;
+  string ipv4 = 3;
+  string ipv6 = 4;
+  uint32 port = 5;
+  string country = 6;
+  string country_code = 7;
+  string city = 8;
+  string city_code = 9;
+  double latitude = 10;
+  double longitude = 11;
+}

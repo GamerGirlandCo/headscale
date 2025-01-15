@@ -253,7 +253,8 @@ func (node *Node) Proto() *v1.Node {
 
 		RegisterMethod: node.RegisterMethodToV1Enum(),
 
-		CreatedAt: timestamppb.New(node.CreatedAt),
+		CreatedAt:       timestamppb.New(node.CreatedAt),
+		IsWireguardOnly: node.IsWireguardOnly,
 	}
 
 	if node.AuthKey != nil {
