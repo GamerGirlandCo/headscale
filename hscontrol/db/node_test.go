@@ -793,11 +793,11 @@ func TestRenameNode(t *testing.T) {
 	require.NoError(t, err)
 
 	err = db.DB.Transaction(func(tx *gorm.DB) error {
-		_, err := RegisterNode(tx, node, nil, nil)
+		_, err := RegisterNode(tx, node, nil, nil, false)
 		if err != nil {
 			return err
 		}
-		_, err = RegisterNode(tx, node2, nil, nil)
+		_, err = RegisterNode(tx, node2, nil, nil, false)
 		return err
 	})
 	require.NoError(t, err)

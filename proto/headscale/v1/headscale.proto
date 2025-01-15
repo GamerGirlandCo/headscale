@@ -133,6 +133,21 @@ service HeadscaleService {
 
   // --- Node end ---
 
+  // --- Peer start ---
+  rpc RegisterPeer(RegisterWgPeerRequest) returns (RegisterNodeResponse) {
+    option (google.api.http) = {
+      post : "/api/v1/peer/register"
+    };
+  }
+
+  rpc ListPeers(ListWgPeersRequest) returns (ListNodesResponse) {
+    option (google.api.http) = {
+      get : "/api/v1/peer"
+    };
+  }
+
+  // --- Peer end ---
+
   // --- Route start ---
   rpc GetRoutes(GetRoutesRequest) returns (GetRoutesResponse) {
     option (google.api.http) = {

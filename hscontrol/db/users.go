@@ -199,6 +199,19 @@ func (hsdb *HSDatabase) AssignNodeToUser(node *types.Node, uid types.UserID) err
 	})
 }
 
+func ListWgPeersByUser(tx *gorm.DB, uid types.UserID) (types.Nodes, error) {
+	nodes := types.Nodes{}
+	if err := tx.Preload("AuthKey").
+		Preload("AuthKey.User").
+		Preload("User").
+		Where(&types.Node{UserID: uint(uid), IsWireguardOnly: true}).
+		Find(&nodes).Error; err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
+}
+
 // AssignNodeToUser assigns a Node to a user.
 func AssignNodeToUser(tx *gorm.DB, node *types.Node, uid types.UserID) error {
 	user, err := GetUserByID(tx, uid)

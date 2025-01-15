@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/netip"
 	"os"
 	"sort"
 	"strings"
@@ -541,6 +542,82 @@ func (api headscaleV1APIServer) BackfillNodeIPs(
 	}
 
 	return &v1.BackfillNodeIPsResponse{Changes: changes}, nil
+}
+
+func (api headscaleV1APIServer) RegisterPeer(
+	ctx context.Context,
+	request *v1.RegisterWgPeerRequest) (*v1.RegisterNodeResponse, error) {
+	log.Trace().
+		Str("user", request.GetUser()).
+		Str("public_key", request.GetPubKey()).
+		Msg("Registering wireguard-only peer")
+
+	ipv4, err := netip.ParseAddr(request.GetIpv4())
+	if err != nil {
+		return nil, fmt.Errorf("parse ip addr: %w", err)
+	}
+	ipv6, err := netip.ParseAddr(request.GetIpv6())
+	var nkey key.NodePublic
+	err = nkey.UnmarshalText([]byte(request.GetPubKey()))
+	if err != nil {
+		return nil, fmt.Errorf("parse ip addr: %w", err)
+	}
+
+	user, err := api.h.db.GetUserByName(request.GetUser())
+	if err != nil {
+		return nil, fmt.Errorf("looking up user: %w", err)
+	}
+
+	node, err := api.h.db.RegisterWireguardOnlyNode(
+		nkey,
+		types.UserID(user.ID),
+		&ipv4, &ipv6,
+		request,
+	)
+	if err != nil {
+		return nil, err
+	}
+	err = nodesChangedHook(api.h.db, api.h.polMan, api.h.nodeNotifier)
+	if err != nil {
+		return nil, fmt.Errorf("updating resources using node: %w", err)
+	}
+	return &v1.RegisterNodeResponse{
+		Node: node.Proto(),
+	}, nil
+}
+
+func (api headscaleV1APIServer) ListPeers(
+	ctx context.Context, 
+	request *v1.ListWgPeersRequest) (*v1.ListNodesResponse, error) {
+	isLikelyConnected := xsync.NewMapOf[types.NodeID, bool]()
+	if request.GetUser() != "" {
+		user, err := api.h.db.GetUserByName(request.GetUser())
+		if err != nil {
+			return nil, err
+		}
+
+		nodes, err := db.Read(api.h.db.DB, func(rx *gorm.DB) (types.Nodes, error) {
+			return db.ListWgPeersByUser(rx, types.UserID(user.ID))
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		response := nodesToProto(api.h.polMan, isLikelyConnected, nodes)
+		return &v1.ListNodesResponse{Nodes: response}, nil
+	}
+
+	nodes, err := api.h.db.ListWgPeers()
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Slice(nodes, func(i, j int) bool {
+		return nodes[i].ID < nodes[j].ID
+	})
+
+	response := nodesToProto(api.h.polMan, isLikelyConnected, nodes)
+	return &v1.ListNodesResponse{Nodes: response}, nil
 }
 
 func (api headscaleV1APIServer) GetRoutes(

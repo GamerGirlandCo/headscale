@@ -48,11 +48,30 @@ message Node {
   repeated string valid_tags = 20;
   string given_name = 21;
   bool online = 22;
+  bool isWireguardOnly = 23;
 }
 
 message RegisterNodeRequest {
   string user = 1;
   string key = 2;
+}
+
+message ListWgPeersRequest {
+  string user = 1;
+}
+
+message RegisterWgPeerRequest {
+  string user = 1;
+  string pubKey = 2;
+  string ipv4 = 3;
+  string ipv6 = 4;
+  uint32 port = 5;
+  string country = 6;
+  string countryCode = 7;
+  string city = 8;
+  string cityCode = 9;
+  double latitude = 10;
+  double longitude = 11;
 }
 
 message RegisterNodeResponse { Node node = 1; }

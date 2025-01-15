@@ -91,6 +91,9 @@ type Node struct {
 	DeletedAt *time.Time
 
 	IsOnline *bool `gorm:"-"`
+
+	IsWireguardOnly bool
+	Location *tailcfg.Location `gorm:"serializer:json"`
 }
 
 type (
@@ -364,7 +367,7 @@ func (node *Node) RegisterMethodToV1Enum() v1.RegisterMethod {
 
 // ApplyHostnameFromHostInfo takes a Hostinfo struct and updates the node.
 func (node *Node) ApplyHostnameFromHostInfo(hostInfo *tailcfg.Hostinfo) {
-	if hostInfo == nil {
+	if hostInfo == nil || node.IsWireguardOnly {
 		return
 	}
 
